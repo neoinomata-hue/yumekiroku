@@ -36,6 +36,21 @@ def create_app():
             return None
         return number
 
+    def normalize_items(value):
+        if value is None:
+            return ""
+        items = []
+        for raw in value.split(","):
+            item = raw.strip()
+            if item and item not in items:
+                items.append(item)
+        return ", ".join(items)
+
+    def split_items(value):
+        if not value:
+            return []
+        return [item.strip() for item in value.split(",") if item.strip()]
+
     def parse_time(value):
         if not value:
             return None
@@ -82,6 +97,19 @@ def create_app():
         first_day = dt.date(year, month, 1)
         last_day = dt.date(year, month, cal.monthrange(year, month)[1])
         return first_day, last_day
+
+    def build_tag_counts(rows, field):
+        counts = {}
+        for row in rows:
+            for item in split_items(row[field]):
+                counts[item] = counts.get(item, 0) + 1
+        return [{"name": name, "count": counts[name]} for name in sorted(counts, key=counts.get, reverse=True)]
+
+    def build_tag_list(rows, field):
+        items = set()
+        for row in rows:
+            items.update(split_items(row[field]))
+        return [{"name": name} for name in sorted(items)]
 
     def mood_class(mood):
         classes = {
@@ -181,14 +209,18 @@ def create_app():
             conditions.append("d.date <= ?")
             params.append(date_to)
         if tag:
-            conditions.append(
-                "("
-                "d.location LIKE ? OR d.people LIKE ? OR d.thing LIKE ? "
-                "OR d.color LIKE ? OR d.smell LIKE ?"
-                ")"
-            )
-            like = f"%{tag}%"
-            params.extend([like, like, like, like, like])
+            term_clauses = []
+            for term in split_items(tag):
+                term_clauses.append(
+                    "("
+                    "d.location LIKE ? OR d.people LIKE ? OR d.thing LIKE ? "
+                    "OR d.color LIKE ? OR d.smell LIKE ?"
+                    ")"
+                )
+                like = f"%{term}%"
+                params.extend([like, like, like, like, like])
+            if term_clauses:
+                conditions.append("(" + " OR ".join(term_clauses) + ")")
 
         where_sql = ""
         if conditions:
@@ -220,12 +252,12 @@ def create_app():
         if request.method == "POST":
             form = request.form
             title = form.get("title", "").strip()
-            location = form.get("location", "").strip()
-            people = form.get("people", "").strip()
-            thing = form.get("thing", "").strip()
+            location = normalize_items(form.get("location", ""))
+            people = normalize_items(form.get("people", ""))
+            thing = normalize_items(form.get("thing", ""))
             sound = parse_int(form.get("sound"), 0, 5)
-            color = form.get("color", "").strip()
-            smell = form.get("smell", "").strip()
+            color = normalize_items(form.get("color", ""))
+            smell = normalize_items(form.get("smell", ""))
             body = form.get("body", "").strip()
             date_str = form.get("date", "").strip() or dt.date.today().isoformat()
             mood = parse_int(form.get("mood"), -2, 2)
@@ -331,12 +363,12 @@ def create_app():
         if request.method == "POST":
             form = request.form
             title = form.get("title", "").strip()
-            location = form.get("location", "").strip()
-            people = form.get("people", "").strip()
-            thing = form.get("thing", "").strip()
+            location = normalize_items(form.get("location", ""))
+            people = normalize_items(form.get("people", ""))
+            thing = normalize_items(form.get("thing", ""))
             sound = parse_int(form.get("sound"), 0, 5)
-            color = form.get("color", "").strip()
-            smell = form.get("smell", "").strip()
+            color = normalize_items(form.get("color", ""))
+            smell = normalize_items(form.get("smell", ""))
             body = form.get("body", "").strip()
             date_str = form.get("date", "").strip() or dt.date.today().isoformat()
             mood = parse_int(form.get("mood"), -2, 2)
@@ -466,70 +498,20 @@ def create_app():
             base_where = "WHERE " + " AND ".join(conditions)
 
         db = get_db()
-        location_rows = db.execute(
+        tag_rows = db.execute(
             f"""
-            SELECT d.location AS name, COUNT(*) AS count
+            SELECT d.location, d.people, d.thing, d.color, d.smell
             FROM dreams d
             {base_where}
-            {"AND" if base_where else "WHERE"} d.location IS NOT NULL AND d.location <> ''
-            GROUP BY d.location
-            ORDER BY count DESC, d.location ASC
-            LIMIT 10
             """,
             params,
         ).fetchall()
 
-        thing_rows = db.execute(
-            f"""
-            SELECT d.thing AS name, COUNT(*) AS count
-            FROM dreams d
-            {base_where}
-            {"AND" if base_where else "WHERE"} d.thing IS NOT NULL AND d.thing <> ''
-            GROUP BY d.thing
-            ORDER BY count DESC, d.thing ASC
-            LIMIT 10
-            """,
-            params,
-        ).fetchall()
-
-        people_rows = db.execute(
-            f"""
-            SELECT d.people AS name, COUNT(*) AS count
-            FROM dreams d
-            {base_where}
-            {"AND" if base_where else "WHERE"} d.people IS NOT NULL AND d.people <> ''
-            GROUP BY d.people
-            ORDER BY count DESC, d.people ASC
-            LIMIT 10
-            """,
-            params,
-        ).fetchall()
-
-        color_rows = db.execute(
-            f"""
-            SELECT d.color AS name, COUNT(*) AS count
-            FROM dreams d
-            {base_where}
-            {"AND" if base_where else "WHERE"} d.color IS NOT NULL AND d.color <> ''
-            GROUP BY d.color
-            ORDER BY count DESC, d.color ASC
-            LIMIT 10
-            """,
-            params,
-        ).fetchall()
-
-        smell_rows = db.execute(
-            f"""
-            SELECT d.smell AS name, COUNT(*) AS count
-            FROM dreams d
-            {base_where}
-            {"AND" if base_where else "WHERE"} d.smell IS NOT NULL AND d.smell <> ''
-            GROUP BY d.smell
-            ORDER BY count DESC, d.smell ASC
-            LIMIT 10
-            """,
-            params,
-        ).fetchall()
+        location_rows = build_tag_counts(tag_rows, "location")[:10]
+        thing_rows = build_tag_counts(tag_rows, "thing")[:10]
+        people_rows = build_tag_counts(tag_rows, "people")[:10]
+        color_rows = build_tag_counts(tag_rows, "color")[:10]
+        smell_rows = build_tag_counts(tag_rows, "smell")[:10]
 
         mood_row = db.execute(
             f"""
@@ -585,46 +567,17 @@ def create_app():
     @app.route("/tags")
     def tag_list():
         db = get_db()
-        locations = db.execute(
+        tag_rows = db.execute(
             """
-            SELECT DISTINCT location AS name
+            SELECT location, people, thing, color, smell
             FROM dreams
-            WHERE location IS NOT NULL AND location <> ''
-            ORDER BY location ASC
             """
         ).fetchall()
-        things = db.execute(
-            """
-            SELECT DISTINCT thing AS name
-            FROM dreams
-            WHERE thing IS NOT NULL AND thing <> ''
-            ORDER BY thing ASC
-            """
-        ).fetchall()
-        people = db.execute(
-            """
-            SELECT DISTINCT people AS name
-            FROM dreams
-            WHERE people IS NOT NULL AND people <> ''
-            ORDER BY people ASC
-            """
-        ).fetchall()
-        colors = db.execute(
-            """
-            SELECT DISTINCT color AS name
-            FROM dreams
-            WHERE color IS NOT NULL AND color <> ''
-            ORDER BY color ASC
-            """
-        ).fetchall()
-        smells = db.execute(
-            """
-            SELECT DISTINCT smell AS name
-            FROM dreams
-            WHERE smell IS NOT NULL AND smell <> ''
-            ORDER BY smell ASC
-            """
-        ).fetchall()
+        locations = build_tag_list(tag_rows, "location")
+        things = build_tag_list(tag_rows, "thing")
+        people = build_tag_list(tag_rows, "people")
+        colors = build_tag_list(tag_rows, "color")
+        smells = build_tag_list(tag_rows, "smell")
 
         return render_template(
             "tags.html",
