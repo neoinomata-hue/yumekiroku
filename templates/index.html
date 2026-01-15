@@ -1,0 +1,53 @@
+﻿{% extends 'base.html' %}
+
+{% block content %}
+<section class="panel">
+  <h2>Search</h2>
+  <form class="search-form" method="get" action="{{ url_for('index') }}">
+    <div class="form-row">
+      <label for="q">Keyword</label>
+      <input id="q" name="q" type="text" value="{{ q }}" placeholder="title or body" />
+    </div>
+    <div class="form-row">
+      <label for="from">From</label>
+      <input id="from" name="from" type="date" value="{{ date_from }}" />
+    </div>
+    <div class="form-row">
+      <label for="to">To</label>
+      <input id="to" name="to" type="date" value="{{ date_to }}" />
+    </div>
+    <div class="form-row">
+      <label for="tag">Tag</label>
+      <input id="tag" name="tag" type="text" value="{{ tag }}" placeholder="e.g. ocean" />
+    </div>
+    <div class="form-actions">
+      <button type="submit">Search</button>
+      <a class="button ghost" href="{{ url_for('index') }}">Reset</a>
+    </div>
+  </form>
+</section>
+
+<section>
+  <h2>Dreams</h2>
+  {% if dreams %}
+    <div class="dream-list">
+      {% for dream in dreams %}
+        <article class="dream-card">
+          <div class="dream-card-header">
+            <h3><a href="{{ url_for('detail', dream_id=dream['dream_id']) }}">{{ dream['title'] }}</a></h3>
+            <span class="date">{{ dream['date'] }}</span>
+          </div>
+          <p class="dream-body">{{ dream['body'][:160] }}{% if dream['body']|length > 160 %}...{% endif %}</p>
+          <div class="meta">
+            <span>Mood: {{ dream['mood'] if dream['mood'] is not none else '-' }}</span>
+            <span>Vividness: {{ dream['vividness'] if dream['vividness'] is not none else '-' }}</span>
+          </div>
+          <div class="tags">Tags: {{ dream['tags'] if dream['tags'] else '-' }}</div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="muted">No dreams found.</p>
+  {% endif %}
+</section>
+{% endblock %}

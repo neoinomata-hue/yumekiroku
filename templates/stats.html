@@ -1,0 +1,39 @@
+﻿{% extends 'base.html' %}
+
+{% block content %}
+<section class="panel">
+  <h2>Stats</h2>
+  <form class="search-form" method="get" action="{{ url_for('stats') }}">
+    <div class="form-row">
+      <label for="from">From</label>
+      <input id="from" name="from" type="date" value="{{ date_from }}" />
+    </div>
+    <div class="form-row">
+      <label for="to">To</label>
+      <input id="to" name="to" type="date" value="{{ date_to }}" />
+    </div>
+    <div class="form-actions">
+      <button type="submit">Apply</button>
+      <a class="button ghost" href="{{ url_for('stats') }}">Reset</a>
+    </div>
+  </form>
+</section>
+
+<section class="panel">
+  <h3>Average Mood</h3>
+  <p class="stat">{{ avg_mood if avg_mood is not none else '-' }}</p>
+</section>
+
+<section class="panel">
+  <h3>Top Tags</h3>
+  {% if tags %}
+    <ol class="tag-ranking">
+      {% for row in tags %}
+        <li>{{ row['name'] }} ({{ row['count'] }})</li>
+      {% endfor %}
+    </ol>
+  {% else %}
+    <p class="muted">No tag data yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

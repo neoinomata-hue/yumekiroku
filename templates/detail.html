@@ -1,0 +1,33 @@
+﻿{% extends 'base.html' %}
+
+{% block content %}
+<section class="panel">
+  <div class="detail-header">
+    <div>
+      <h2>{{ dream['title'] }}</h2>
+      <div class="date">{{ dream['date'] }}</div>
+    </div>
+    <div class="detail-actions">
+      <a class="button" href="{{ url_for('edit_dream', dream_id=dream['dream_id']) }}">Edit</a>
+      <form method="post" action="{{ url_for('delete_dream', dream_id=dream['dream_id']) }}" onsubmit="return confirm('Delete this dream?');">
+        <button class="button danger" type="submit">Delete</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="detail-body">
+    <p>{{ dream['body'] }}</p>
+  </div>
+
+  <div class="meta">
+    <span>Mood: {{ dream['mood'] if dream['mood'] is not none else '-' }}</span>
+    <span>Vividness: {{ dream['vividness'] if dream['vividness'] is not none else '-' }}</span>
+  </div>
+  <div class="tags">Tags: {{ tags if tags else '-' }}</div>
+
+  <div class="timestamps">
+    <span>Created: {{ dream['created_at'] }}</span>
+    <span>Updated: {{ dream['updated_at'] }}</span>
+  </div>
+</section>
+{% endblock %}

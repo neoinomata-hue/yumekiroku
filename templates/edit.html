@@ -1,0 +1,37 @@
+﻿{% extends 'base.html' %}
+
+{% block content %}
+<section class="panel">
+  <h2>Edit Dream</h2>
+  <form method="post" class="dream-form">
+    <div class="form-row">
+      <label for="date">Date</label>
+      <input id="date" name="date" type="date" value="{{ dream['date'] }}" />
+    </div>
+    <div class="form-row">
+      <label for="title">Title *</label>
+      <input id="title" name="title" type="text" value="{{ dream['title'] }}" required />
+    </div>
+    <div class="form-row">
+      <label for="body">Body *</label>
+      <textarea id="body" name="body" rows="6" required>{{ dream['body'] }}</textarea>
+    </div>
+    <div class="form-row">
+      <label for="mood">Mood (-2 to 2)</label>
+      <input id="mood" name="mood" type="number" min="-2" max="2" value="{{ dream['mood'] if dream['mood'] is not none else '' }}" />
+    </div>
+    <div class="form-row">
+      <label for="vividness">Vividness (1 to 5)</label>
+      <input id="vividness" name="vividness" type="number" min="1" max="5" value="{{ dream['vividness'] if dream['vividness'] is not none else '' }}" />
+    </div>
+    <div class="form-row">
+      <label for="tags">Tags (comma-separated)</label>
+      <input id="tags" name="tags" type="text" value="{{ tags }}" />
+    </div>
+    <div class="form-actions">
+      <button type="submit">Save</button>
+      <a class="button ghost" href="{{ url_for('detail', dream_id=dream['dream_id']) }}">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}
