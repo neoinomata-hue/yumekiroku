@@ -1,0 +1,69 @@
+﻿{% extends 'base.html' %}
+
+{% block content %}
+<section class="panel">
+  <h2>タグ一覧</h2>
+  <div class="tag-sections">
+    <div>
+      <h3>場所</h3>
+      {% if locations %}
+        <div class="tag-list">
+          {% for row in locations %}
+            <a class="tag-chip" href="{{ url_for('search', tag=row['name']) }}">{{ row['name'] }}</a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="muted">登録がありません。</p>
+      {% endif %}
+    </div>
+    <div>
+      <h3>人物</h3>
+      {% if people %}
+        <div class="tag-list">
+          {% for row in people %}
+            <a class="tag-chip" href="{{ url_for('search', tag=row['name']) }}">{{ row['name'] }}</a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="muted">登録がありません。</p>
+      {% endif %}
+    </div>
+    <div>
+      <h3>物</h3>
+      {% if things %}
+        <div class="tag-list">
+          {% for row in things %}
+            <a class="tag-chip" href="{{ url_for('search', tag=row['name']) }}">{{ row['name'] }}</a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="muted">登録がありません。</p>
+      {% endif %}
+    </div>
+    <div>
+      <h3>色</h3>
+      {% if colors %}
+        <div class="tag-list">
+          {% for row in colors %}
+            <a class="tag-chip" href="{{ url_for('search', tag=row['name']) }}">{{ row['name'] }}</a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="muted">登録がありません。</p>
+      {% endif %}
+    </div>
+    <div>
+      <h3>匂い</h3>
+      {% if smells %}
+        <div class="tag-list">
+          {% for row in smells %}
+            <a class="tag-chip" href="{{ url_for('search', tag=row['name']) }}">{{ row['name'] }}</a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="muted">登録がありません。</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

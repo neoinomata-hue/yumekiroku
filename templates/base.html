@@ -1,20 +1,21 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dream Journal</title>
+  <title>夢日記</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 <body>
   <header class="site-header">
     <div class="container">
-      <h1><a href="{{ url_for('index') }}">Dream Journal</a></h1>
+      <h1><a href="{{ url_for('new_dream') }}">夢日記</a></h1>
       <nav>
-        <a href="{{ url_for('index') }}">Dreams</a>
-        <a href="{{ url_for('new_dream') }}">New</a>
-        <a href="{{ url_for('index') }}">Search</a>
-        <a href="{{ url_for('stats') }}">Stats</a>
+        <a href="{{ url_for('calendar_view') }}">カレンダー</a>
+        <a href="{{ url_for('new_dream') }}">新規作成</a>
+        <a href="{{ url_for('search') }}">検索</a>
+        <a href="{{ url_for('tag_list') }}">タグ一覧</a>
+        <a href="{{ url_for('stats') }}">集計</a>
       </nav>
     </div>
   </header>

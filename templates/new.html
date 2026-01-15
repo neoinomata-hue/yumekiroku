@@ -2,36 +2,108 @@
 
 {% block content %}
 <section class="panel">
-  <h2>New Dream</h2>
-  <form method="post" class="dream-form">
+  <h2>新規作成</h2>
+  <form method="post" class="dream-form" enctype="multipart/form-data">
     <div class="form-row">
-      <label for="date">Date</label>
+      <label for="date">日付</label>
       <input id="date" name="date" type="date" value="{{ form.get('date', '') }}" />
     </div>
     <div class="form-row">
-      <label for="title">Title *</label>
+      <label for="title">タイトル *</label>
       <input id="title" name="title" type="text" value="{{ form.get('title', '') }}" required />
     </div>
     <div class="form-row">
-      <label for="body">Body *</label>
+      <label for="location">場所</label>
+      <input id="location" name="location" type="text" value="{{ form.get('location', '') }}" />
+    </div>
+    <div class="form-row">
+      <label for="people">人物</label>
+      <input id="people" name="people" type="text" value="{{ form.get('people', '') }}" />
+    </div>
+    <div class="form-row">
+      <label for="thing">物</label>
+      <input id="thing" name="thing" type="text" value="{{ form.get('thing', '') }}" />
+    </div>
+    <div class="form-row">
+      <label for="sound">音 (0 〜 5)</label>
+      <input id="sound" name="sound" type="number" min="0" max="5" value="{{ form.get('sound', '') }}" />
+    </div>
+    <div class="form-row">
+      <label for="color">色</label>
+      <input id="color" name="color" type="text" value="{{ form.get('color', '') }}" />
+    </div>
+    <div class="form-row">
+      <label for="smell">匂い</label>
+      <input id="smell" name="smell" type="text" value="{{ form.get('smell', '') }}" />
+    </div>
+    <div class="form-row">
+      <label for="body">本文 *</label>
       <textarea id="body" name="body" rows="6" required>{{ form.get('body', '') }}</textarea>
     </div>
     <div class="form-row">
-      <label for="mood">Mood (-2 to 2)</label>
+      <label for="mood">吉夢/悪夢 (-2 〜 2)</label>
       <input id="mood" name="mood" type="number" min="-2" max="2" value="{{ form.get('mood', '') }}" />
     </div>
     <div class="form-row">
-      <label for="vividness">Vividness (1 to 5)</label>
+      <label for="vividness">鮮明度 (1 〜 5)</label>
       <input id="vividness" name="vividness" type="number" min="1" max="5" value="{{ form.get('vividness', '') }}" />
     </div>
     <div class="form-row">
-      <label for="tags">Tags (comma-separated)</label>
-      <input id="tags" name="tags" type="text" value="{{ form.get('tags', '') }}" placeholder="ocean, school" />
+      <label for="fatigue">疲労度 (0 〜 5)</label>
+      <input id="fatigue" name="fatigue" type="number" min="0" max="5" value="{{ form.get('fatigue', '') }}" />
+    </div>
+    <div class="form-row">
+      <label for="sleep_start">寝た時間（開始）</label>
+      <input id="sleep_start" name="sleep_start" type="time" value="{{ form.get('sleep_start', '') }}" />
+    </div>
+    <div class="form-row">
+      <label for="sleep_end">寝た時間（終了）</label>
+      <input id="sleep_end" name="sleep_end" type="time" value="{{ form.get('sleep_end', '') }}" />
+    </div>
+    <div class="form-row">
+      <label for="sleep_duration">睡眠時間（自動計算）</label>
+      <input id="sleep_duration" name="sleep_duration" type="text" value="{{ form.get('sleep_duration', '') }}" readonly />
+    </div>
+    <div class="form-row">
+      <label for="image">画像</label>
+      <input id="image" name="image" type="file" accept="image/*" />
     </div>
     <div class="form-actions">
-      <button type="submit">Create</button>
-      <a class="button ghost" href="{{ url_for('index') }}">Cancel</a>
+      <button type="submit">登録</button>
+      <a class="button ghost" href="{{ url_for('calendar_view') }}">キャンセル</a>
     </div>
   </form>
 </section>
+
+<script>
+  const startInput = document.getElementById('sleep_start');
+  const endInput = document.getElementById('sleep_end');
+  const durationInput = document.getElementById('sleep_duration');
+
+  function updateSleepDuration() {
+    if (!startInput.value || !endInput.value) {
+      durationInput.value = '';
+      return;
+    }
+    const [sh, sm] = startInput.value.split(':').map(Number);
+    const [eh, em] = endInput.value.split(':').map(Number);
+    if (Number.isNaN(sh) || Number.isNaN(sm) || Number.isNaN(eh) || Number.isNaN(em)) {
+      durationInput.value = '';
+      return;
+    }
+    let startMinutes = sh * 60 + sm;
+    let endMinutes = eh * 60 + em;
+    if (endMinutes < startMinutes) {
+      endMinutes += 24 * 60;
+    }
+    const diff = endMinutes - startMinutes;
+    const hours = Math.floor(diff / 60);
+    const mins = diff % 60;
+    durationInput.value = `${hours}時間${String(mins).padStart(2, '0')}分`;
+  }
+
+  startInput.addEventListener('change', updateSleepDuration);
+  endInput.addEventListener('change', updateSleepDuration);
+  updateSleepDuration();
+</script>
 {% endblock %}

@@ -1,0 +1,50 @@
+﻿{% extends 'base.html' %}
+
+{% block content %}
+<section class="panel calendar-panel">
+  <div class="calendar-header">
+    <a class="button ghost" href="{{ url_for('calendar_view', ym=prev_ym) }}">←</a>
+    <h2>{{ year }}年{{ '%02d'|format(month) }}月</h2>
+    <a class="button ghost" href="{{ url_for('calendar_view', ym=next_ym) }}">→</a>
+  </div>
+
+  <div class="calendar-grid">
+    <div class="calendar-weekday">日</div>
+    <div class="calendar-weekday">月</div>
+    <div class="calendar-weekday">火</div>
+    <div class="calendar-weekday">水</div>
+    <div class="calendar-weekday">木</div>
+    <div class="calendar-weekday">金</div>
+    <div class="calendar-weekday">土</div>
+
+    {% for week in weeks %}
+      {% for day in week %}
+        {% set day_str = day.isoformat() %}
+        {% set dream = dreams_by_date.get(day_str) %}
+        {% set mood = mood_class(dream['mood']) if dream else 'mood-empty' %}
+        <div class="calendar-day {{ mood }}{% if day.month != month %} other-month{% endif %}{% if day_str == today %} today{% endif %}">
+          {% if dream %}
+            <a class="day-link" href="{{ url_for('detail', dream_id=dream['dream_id']) }}">
+              <div class="day-number">{{ day.day }}</div>
+              <div class="day-title" title="{{ dream['title'] }}">{{ dream['title'] }}</div>
+              <div class="day-meta">吉夢/悪夢 {% if dream['mood'] is none %}-{% elif dream['mood'] >= 1 %}吉夢{% elif dream['mood'] <= -1 %}悪夢{% else %}中立{% endif %} / 鮮明度 {{ dream['vividness'] if dream['vividness'] is not none else '-' }}</div>
+              <div class="day-meta">睡眠 {{ dream['sleep_display'] }}</div>
+              {% if dream['image_path'] %}
+                <img class="day-thumb" src="{{ url_for('static', filename=dream['image_path']) }}" alt="dream image" />
+              {% endif %}
+              {% if counts.get(day_str, 0) > 1 %}
+                <div class="day-more">+{{ counts.get(day_str) - 1 }}件</div>
+              {% endif %}
+            </a>
+          {% else %}
+            <a class="day-link" href="{{ url_for('new_dream', date=day_str) }}">
+              <div class="day-number">{{ day.day }}</div>
+              <div class="day-empty">未登録</div>
+            </a>
+          {% endif %}
+        </div>
+      {% endfor %}
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

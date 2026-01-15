@@ -2,38 +2,100 @@
 
 {% block content %}
 <section class="panel">
-  <h2>Stats</h2>
+  <h2>集計</h2>
   <form class="search-form" method="get" action="{{ url_for('stats') }}">
     <div class="form-row">
-      <label for="from">From</label>
+      <label for="from">開始日</label>
       <input id="from" name="from" type="date" value="{{ date_from }}" />
     </div>
     <div class="form-row">
-      <label for="to">To</label>
+      <label for="to">終了日</label>
       <input id="to" name="to" type="date" value="{{ date_to }}" />
     </div>
     <div class="form-actions">
-      <button type="submit">Apply</button>
-      <a class="button ghost" href="{{ url_for('stats') }}">Reset</a>
+      <button type="submit">適用</button>
+      <a class="button ghost" href="{{ url_for('stats') }}">リセット</a>
     </div>
   </form>
 </section>
 
 <section class="panel">
-  <h3>Average Mood</h3>
+  <h3>吉夢/悪夢の平均</h3>
   <p class="stat">{{ avg_mood if avg_mood is not none else '-' }}</p>
 </section>
 
 <section class="panel">
-  <h3>Top Tags</h3>
-  {% if tags %}
+  <h3>疲労度の平均</h3>
+  <p class="stat">{{ avg_fatigue if avg_fatigue is not none else '-' }}</p>
+</section>
+
+<section class="panel">
+  <h3>睡眠時間の平均</h3>
+  <p class="stat">{{ avg_sleep if avg_sleep is not none else '-' }}</p>
+</section>
+
+<section class="panel">
+  <h3>場所ランキング</h3>
+  {% if location_rows %}
     <ol class="tag-ranking">
-      {% for row in tags %}
+      {% for row in location_rows %}
         <li>{{ row['name'] }} ({{ row['count'] }})</li>
       {% endfor %}
     </ol>
   {% else %}
-    <p class="muted">No tag data yet.</p>
+    <p class="muted">場所データがまだありません。</p>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <h3>物ランキング</h3>
+  {% if thing_rows %}
+    <ol class="tag-ranking">
+      {% for row in thing_rows %}
+        <li>{{ row['name'] }} ({{ row['count'] }})</li>
+      {% endfor %}
+    </ol>
+  {% else %}
+    <p class="muted">物データがまだありません。</p>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <h3>人物ランキング</h3>
+  {% if people_rows %}
+    <ol class="tag-ranking">
+      {% for row in people_rows %}
+        <li>{{ row['name'] }} ({{ row['count'] }})</li>
+      {% endfor %}
+    </ol>
+  {% else %}
+    <p class="muted">人物データがまだありません。</p>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <h3>色ランキング</h3>
+  {% if color_rows %}
+    <ol class="tag-ranking">
+      {% for row in color_rows %}
+        <li>{{ row['name'] }} ({{ row['count'] }})</li>
+      {% endfor %}
+    </ol>
+  {% else %}
+    <p class="muted">色データがまだありません。</p>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <h3>匂いランキング</h3>
+  {% if smell_rows %}
+    <ol class="tag-ranking">
+      {% for row in smell_rows %}
+        <li>{{ row['name'] }} ({{ row['count'] }})</li>
+      {% endfor %}
+    </ol>
+  {% else %}
+    <p class="muted">匂いデータがまだありません。</p>
   {% endif %}
 </section>
 {% endblock %}

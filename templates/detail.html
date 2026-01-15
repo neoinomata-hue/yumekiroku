@@ -8,26 +8,45 @@
       <div class="date">{{ dream['date'] }}</div>
     </div>
     <div class="detail-actions">
-      <a class="button" href="{{ url_for('edit_dream', dream_id=dream['dream_id']) }}">Edit</a>
-      <form method="post" action="{{ url_for('delete_dream', dream_id=dream['dream_id']) }}" onsubmit="return confirm('Delete this dream?');">
-        <button class="button danger" type="submit">Delete</button>
+      <a class="button" href="{{ url_for('edit_dream', dream_id=dream['dream_id']) }}">編集</a>
+      <form method="post" action="{{ url_for('delete_dream', dream_id=dream['dream_id']) }}" onsubmit="return confirm('この夢を削除しますか？');">
+        <button class="button danger" type="submit">削除</button>
       </form>
     </div>
   </div>
 
-  <div class="detail-body">
-    <p>{{ dream['body'] }}</p>
+  <div class="detail-main">
+    {% if dream['image_path'] %}
+      <div class="detail-image">
+        <img src="{{ url_for('static', filename=dream['image_path']) }}" alt="dream image" />
+      </div>
+    {% endif %}
+
+    <div class="detail-body">
+      <p>{{ dream['body'] }}</p>
+    </div>
   </div>
 
   <div class="meta">
-    <span>Mood: {{ dream['mood'] if dream['mood'] is not none else '-' }}</span>
-    <span>Vividness: {{ dream['vividness'] if dream['vividness'] is not none else '-' }}</span>
+    <span>吉夢/悪夢: {% if dream['mood'] is none %}-{% elif dream['mood'] >= 1 %}吉夢{% elif dream['mood'] <= -1 %}悪夢{% else %}中立{% endif %}</span>
+    <span>鮮明度: {{ dream['vividness'] if dream['vividness'] is not none else '-' }}</span>
+    <span>疲労度: {{ dream['fatigue'] if dream['fatigue'] is not none else '-' }}</span>
   </div>
-  <div class="tags">Tags: {{ tags if tags else '-' }}</div>
+
+  <div class="detail-grid">
+    <div><strong>場所:</strong> {{ dream['location'] if dream['location'] else '-' }}</div>
+    <div><strong>人物:</strong> {{ dream['people'] if dream['people'] else '-' }}</div>
+    <div><strong>物:</strong> {{ dream['thing'] if dream['thing'] else '-' }}</div>
+    <div><strong>音:</strong> {{ dream['sound'] if dream['sound'] is not none else '-' }}</div>
+    <div><strong>色:</strong> {{ dream['color'] if dream['color'] else '-' }}</div>
+    <div><strong>匂い:</strong> {{ dream['smell'] if dream['smell'] else '-' }}</div>
+    <div><strong>寝た時間:</strong> {{ dream['sleep_start'] if dream['sleep_start'] else '-' }} 〜 {{ dream['sleep_end'] if dream['sleep_end'] else '-' }}</div>
+    <div><strong>睡眠時間:</strong> {{ sleep_display }}</div>
+  </div>
 
   <div class="timestamps">
-    <span>Created: {{ dream['created_at'] }}</span>
-    <span>Updated: {{ dream['updated_at'] }}</span>
+    <span>作成: {{ dream['created_at'] }}</span>
+    <span>更新: {{ dream['updated_at'] }}</span>
   </div>
 </section>
 {% endblock %}
